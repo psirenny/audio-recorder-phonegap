@@ -1,0 +1,29 @@
+{
+  "author": "psirenny <djtorres0@gmail.com>",
+  "bugs": {
+    "url": "https://github.com/psirenny/audio-recorder-phonegap/issues"
+  },
+  "dependencies": {
+    "lodash": "*"
+  },
+  "description": "Phonegap audio recorder plugin.",
+  "keywords": [
+    "audio",
+    "microphone",
+    "mobile",
+    "phonegap",
+    "record"
+  ],
+  "license": "MIT",
+  "main": "index.js",
+  "name": "audio-recorder-phonegap",
+  "readmeFilename": "README.md",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/psirenny/audio-recorder-phonegap.git"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "version": "0.1.0"
+}
