@@ -1,16 +1,24 @@
+var uuid = require('node-uuid');
+
 module.exports = function () {
   return {
     available: function (callback) {
       callback(typeof Media !== 'undefined');
     },
     permission: function (callback) {
-      return callback(true);
+      callback(true);
     },
     start: function (callback) {
-      return callback();
+      var basename = 'documents://' + uuid.v1();
+      var extname = window.device.platform === 'Android' ? '.amr' : '.wav';
+      this.rec = new Media(basename + extname);
+      this.rec.startRecord();
+      callback();
     },
     stop: function (callback) {
-      return callback();
+      this.rec.stopRecord();
+      this.rec.play();
+      callback();
     }
   };
 };

@@ -4,7 +4,7 @@
     "url": "https://github.com/psirenny/audio-recorder-phonegap/issues"
   },
   "dependencies": {
-    "lodash": "*"
+    "node-uuid": "*"
   },
   "description": "Phonegap audio recorder plugin.",
   "keywords": [
