@@ -17,7 +17,6 @@ module.exports = function () {
     },
     stop: function (callback) {
       this.rec.stopRecord();
-      this.rec.play();
       callback();
     }
   };
