@@ -9,15 +9,16 @@ module.exports = function () {
       callback(true);
     },
     start: function (callback) {
-      var basename = 'documents://' + uuid.v1();
-      var extname = window.device.platform === 'Android' ? '.amr' : '.wav';
-      this.rec = new Media(basename + extname);
+      var ext = window.device.platform === 'Android' ? '.amr' : '.wav'
+      var url = 'documents://' + uuid.v1() + ext;
+      this.rec = new Media(url);
+      this.rec.url = url;
       this.rec.startRecord();
       callback();
     },
     stop: function (callback) {
       this.rec.stopRecord();
-      callback();
+      callback(null, this.rec.url);
     }
   };
 };
