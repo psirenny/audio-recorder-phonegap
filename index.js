@@ -17,7 +17,7 @@ module.exports = function () {
       opts.mimeType = 'audio/' + this.rec.ext;
       transfer.upload(this.rec.uri, url, function (data) {
         var res = JSON.parse(data.response);
-        callback(null, res.url);
+        callback(null, res);
       }, callback, opts);
     },
     start: function (callback) {
