@@ -5,6 +5,7 @@ module.exports = function () {
     available: function (callback) {
       callback(typeof Media !== 'undefined');
     },
+    name: 'phonegap',
     permission: function (callback) {
       callback(true);
     },
