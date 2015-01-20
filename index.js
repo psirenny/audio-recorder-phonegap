@@ -23,12 +23,22 @@ Strategy.prototype.start = function (callback) {
   var type = window.device.platform === 'Android' ? 'amr' : 'wav';
   var filename = uuid.v1() + '.' + type;
 
+  this.data.onSuccess = function () {
+    // do nothing because the callback will fire in onFile()
+  };
+
+  this.data.onError = function (err) {
+    // return an error and disable the callback in onFire()
+    callback(err);
+    callback = function () {};
+  };
+
   function onMediaSuccess() {
-    callback(null);
+    self.data.onSuccess();
   }
 
   function onMediaError(err) {
-    callback(err);
+    self.data.onError(err);
   }
 
   function onFile(entry) {
@@ -37,7 +47,7 @@ Strategy.prototype.start = function (callback) {
     self.data.rec.startRecord();
     self.data.rec.type = type;
     self.data.rec.url = entry.toURL();
-    callback(null);
+    setTimeout(callback, 0);
   }
 
   function onFileSystem(fs) {
@@ -54,8 +64,16 @@ Strategy.prototype.start = function (callback) {
 
 Strategy.prototype.stop = function (callback) {
   var rec = this.data.rec;
+
+  this.data.onError = function (err) {
+    callback(err);
+  };
+
+  this.data.onSuccess = function () {
+    callback(null, {type: rec.type, url: rec.url});
+  };
+
   rec.stopRecord();
-  callback(null, {type: rec.type, url: rec.url});
 };
 
 module.exports = function () {
