@@ -23,16 +23,25 @@ Strategy.prototype.start = function (callback) {
   var type = window.device.platform === 'Android' ? 'amr' : 'wav';
   var filename = uuid.v1() + '.' + type;
 
-  function onFileSystem(fs) {
-    fs.root.getFile(filename, {create: true}, onFile);
+  function onMediaSuccess() {
+    callback(null);
+  }
+
+  function onMediaError(err) {
+    callback(err);
   }
 
   function onFile(entry) {
-    self.data.rec = new Media('documents://' + filename);
+    var filepath = 'documents://' + filename;
+    self.data.rec = new Media(filepath, onMediaSuccess, onMediaError);
     self.data.rec.startRecord();
     self.data.rec.type = type;
     self.data.rec.url = entry.toURL();
     callback(null);
+  }
+
+  function onFileSystem(fs) {
+    fs.root.getFile(filename, {create: true}, onFile);
   }
 
   requestFileSystem(
