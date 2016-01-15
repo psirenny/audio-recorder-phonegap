@@ -1,0 +1,18 @@
+{
+  "env": {
+    "browser": true,
+    "node": true
+  },
+  "rules": {
+    "consistent-return": [0],
+    "curly": [2, "multi-line"],
+    "global-strict": [2, "always"],
+    "new-cap": [2, {"capIsNew": false}],
+    "no-multiple-empty-lines": [2, {"max": 1}],
+    "no-return-assign": [0],
+    "no-shadow": [0],
+    "no-underscore-dangle": [0],
+    "quotes": [2, "single"],
+    "space-before-function-paren": [2, {"anonymous": "always", "named": "never"}]
+  }
+}

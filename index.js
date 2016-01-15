@@ -1,3 +1,7 @@
+'use strict';
+
+/* global Media */
+
 var uuid = require('node-uuid');
 
 function Strategy() {}
@@ -20,60 +24,79 @@ Strategy.prototype.permission = function (callback) {
 
 Strategy.prototype.start = function (callback) {
   var self = this;
-  var type = window.device.platform === 'Android' ? 'amr' : 'wav';
-  var filename = uuid.v1() + '.' + type;
+  var fileProtocol = window.cordova.platformId === 'ios' ? 'documents://' : '';
+  var fileExt = window.cordova.platformId === 'android' ? 'amr' : 'wav';
+  var fileType = window.cordova.platformId === 'android' ? '3gp' : 'wav';
+  var fileName = uuid.v1() + '.' + fileExt;
 
-  this.data.onSuccess = function () {
-    // do nothing because the callback will fire in onFile()
-  };
-
-  this.data.onError = function (err) {
-    // return an error and disable the callback in onFire()
-    callback(err);
-    callback = function () {};
-  };
-
-  function onMediaSuccess() {
-    self.data.onSuccess();
+  function onCreateMediaSuccess() {
+    self.data.rec.callback();
   }
 
-  function onMediaError(err) {
-    self.data.onError(err);
+  function onCreateMediaFailure(err) {
+    self.data.rec.callback(err);
   }
 
-  function onFile(entry) {
-    var filepath = 'documents://' + filename;
-    self.data.rec = new Media(filepath, onMediaSuccess, onMediaError);
+  function onCreateFileSuccess(file) {
+    var mediaSrc = fileProtocol ? (fileProtocol + fileName) : file.nativeURL;
+    self.data.rec = new Media(mediaSrc, onCreateMediaSuccess, onCreateMediaFailure);
+    self.data.rec.type = fileType;
+    self.data.rec.url = file.nativeURL;
     self.data.rec.startRecord();
-    self.data.rec.type = type;
-    self.data.rec.url = entry.toURL();
-    setTimeout(callback, 0);
+    callback();
   }
 
-  function onFileSystem(fs) {
-    fs.root.getFile(filename, {create: true}, onFile);
+  function onCreateFileFailure(err) {
+    callback(err);
   }
 
-  requestFileSystem(
-    LocalFileSystem.PERSISTENT,
-    0,
-    onFileSystem,
-    callback
-  );
+  function onGetDirectorySuccess(dir) {
+    dir.getFile(
+      fileName,
+      {create: true},
+      onCreateFileSuccess,
+      onCreateFileFailure
+    );
+  }
+
+  function onGetDirectoryFailure(err) {
+    callback(err);
+  }
+
+  function onGetFileSystemSuccess(fs) {
+    onGetDirectorySuccess(fs.root);
+  }
+
+  function onGetFileSystemFailure(err) {
+    callback(err);
+  }
+
+  if (window.cordova.platformId === 'android') {
+    window.resolveLocalFileSystemURL(
+      window.cordova.file.externalCacheDirectory,
+      onGetDirectorySuccess,
+      onGetDirectoryFailure
+    );
+  } else {
+    window.requestFileSystem(
+      window.LocalFileSystem.PERSISTENT,
+      0,
+      onGetFileSystemSuccess,
+      onGetFileSystemFailure
+    );
+  }
 };
 
 Strategy.prototype.stop = function (callback) {
   var rec = this.data.rec;
-
-  this.data.onError = function (err) {
-    callback(err);
-  };
-
-  this.data.onSuccess = function () {
-    callback(null, {type: rec.type, url: rec.url});
-  };
-
+  var result = {type: rec.type, url: rec.url};
+  rec.callback = function (err) { callback(err, result); };
   rec.stopRecord();
+  rec.release();
+
+  if (window.cordova.platformId === 'android') {
+    rec.callback();
+  }
 };
 
 module.exports = function () {
