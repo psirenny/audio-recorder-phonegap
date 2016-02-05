@@ -1,13 +1,11 @@
 'use strict';
 
-/* global Media */
-
 var uuid = require('node-uuid');
 
 function Strategy() {}
 
 Strategy.prototype.available = function (callback) {
-  callback(null, typeof Media !== 'undefined');
+  callback(null, !!window.Media);
 };
 
 Strategy.prototype.create = function () {
@@ -19,7 +17,15 @@ Strategy.prototype.destroy = function () {
 };
 
 Strategy.prototype.permission = function (callback) {
-  callback(null, true);
+  if (!window.navigator.microphone) {
+    return callback(null, true);
+  }
+
+  setTimeout(function () {
+    window.navigator.microphone(function (permission) {
+      callback(null, permission);
+    });
+  });
 };
 
 Strategy.prototype.start = function (callback) {
@@ -39,7 +45,7 @@ Strategy.prototype.start = function (callback) {
 
   function onCreateFileSuccess(file) {
     var mediaSrc = fileProtocol ? (fileProtocol + fileName) : file.nativeURL;
-    self.data.rec = new Media(mediaSrc, onCreateMediaSuccess, onCreateMediaFailure);
+    self.data.rec = new window.Media(mediaSrc, onCreateMediaSuccess, onCreateMediaFailure);
     self.data.rec.type = fileType;
     self.data.rec.url = file.nativeURL;
     self.data.rec.startRecord();
@@ -92,6 +98,8 @@ Strategy.prototype.stop = function (callback) {
   var result = {type: rec.type, url: rec.url};
   rec.callback = function (err) { callback(err, result); };
   rec.stopRecord();
+  rec.play();
+  rec.stop();
   rec.release();
 
   if (window.cordova.platformId === 'android') {
