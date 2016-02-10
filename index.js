@@ -36,7 +36,8 @@ Strategy.prototype.start = function (callback) {
   var fileName = uuid.v1() + '.' + fileExt;
 
   function onCreateMediaSuccess() {
-    self.data.rec.callback();
+    if (self.data.rec) self.data.rec.callback();
+    self.data.rec = null;
   }
 
   function onCreateMediaFailure(err) {
