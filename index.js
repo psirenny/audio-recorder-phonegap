@@ -17,14 +17,19 @@ Strategy.prototype.destroy = function () {
 };
 
 Strategy.prototype.permission = function (callback) {
-  if (!window.navigator.microphone) {
+  if (!window.cordova.plugins.diagnostic) {
     return callback(null, true);
   }
 
-  setTimeout(function () {
-    window.navigator.microphone(function (permission) {
-      callback(null, permission);
-    });
+  return setTimeout(function () {
+    window.cordova.plugins.diagnostic.requestMicrophoneAuthorization(
+      function (status) {
+        callback(null, status === cordova.plugins.diagnostic.permissionStatus.GRANTED);
+      },
+      function (err) {
+        callback(err);
+      }
+    )
   });
 };
 
